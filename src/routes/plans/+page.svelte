@@ -1,4 +1,4 @@
-//JavaScript Section
+
 <script>
     // Variables to store data
     let selectedActivities = []; // Array to store selected activities
