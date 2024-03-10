@@ -1,4 +1,4 @@
-
+<!--JavaScript Section-->
 <script>
     // Variables to store data
     let selectedActivities = []; // Array to store selected activities
@@ -6,6 +6,7 @@
     let error = ''; // Current suggested activity
     let weekendPlan = []; // Array to store the finalized weekend plan
     let showWeekendPlan = false; // Boolean to control the visibility of weekend plan
+    let buttonClicked = false;
 
     // Function to fetch activity suggestion from Bored API
     async function fetchActivity() {
@@ -66,6 +67,7 @@
         showWeekendPlan = true;
         // Clear screen to display only weekend plan
         clearScreen();
+        buttonClicked = true;
     }
 
     // Function to clear screen and show only the weekend plan
@@ -80,6 +82,11 @@
     function updateSelectedActivitiesCount() {
         // Placeholder for updating selected activities count
     }
+
+    function refreshPage() {
+    window.location.reload();
+  }
+
 </script>
 
 <!-- HTML Section -->
@@ -150,7 +157,18 @@
     </div>
     </div>
     <!-- Button to generate weekend plan -->
+    {#if !buttonClicked}
     <button on:click={generatePlan}
-        class="w-auto mt-4 bg-blue-700 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-        disabled={selectedActivities.length === 0}>Generate Plan</button>
+            class="w-auto mt-4 bg-blue-700 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            disabled={selectedActivities.length === 0}>Generate Plan</button>
+  {/if}
+
+   <!-- Button to generate Another weekend plan -->
+   {#if buttonClicked}
+   <button on:click={refreshPage}
+           class="w-auto mt-4 bg-blue-700 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+           disabled={selectedActivities.length === 0}>Generate Another Plan</button>
+ {/if}
+
+    
 </main>
