@@ -1,45 +1,53 @@
-<!-- App.svelte -->
-
+//JavaScript Section
 <script>
-    let selectedActivities = [];
-    let activity = '';
-    let participants = 1; // Default number of participants
-    let error = '';
-    let weekendPlan = [];
-    let showWeekendPlan = false;
+    // Variables to store data
+    let selectedActivities = []; // Array to store selected activities
+    let activity = ''; // Current suggested activity
+    let error = ''; // Current suggested activity
+    let weekendPlan = []; // Array to store the finalized weekend plan
+    let showWeekendPlan = false; // Boolean to control the visibility of weekend plan
 
-    // Function to fetch activity suggestion
+    // Function to fetch activity suggestion from Bored API
     async function fetchActivity() {
+        // Get the selected activity type from the dropdown
         const type = document.getElementById('activity-type').value;
-        const apiUrl = `https://www.boredapi.com/api/activity?type=${type}&participants=${participants}`;
+        // Construct API URL based on the selected activity type
+        const apiUrl = `https://www.boredapi.com/api/activity?type=${type}`;
 
         try {
+            // Fetch data from Bored API
             const response = await fetch(apiUrl);
+            // Check if response is successful
             if (!response.ok) {
+                // Throw an error if response is not ok
                 throw new Error('Failed to fetch data from Bored API');
             }
+            // Parse response data as JSON
             const data = await response.json();
-            // Check if activity is available
-            if (typeof data.activity !== 'undefined') {
-                activity = data.activity;
-                error = '';
-               
-            } else {
-                throw new Error('No activity found. Please choose another activity.');
-            }
+            // Update 'activity' variable with the fetched activity
+            activity = data.activity;
+            // Reset 'error' variable
+            error = '';
         } catch (error) {
+            // Log and handle errors during fetching activity
             console.error('Error fetching activity:', error);
+            // Update 'error' variable with appropriate message
             error = error.message || 'Failed to fetch activity. Please try again.';
         }
     }
 
     // Function to handle accepting activity
     function acceptActivity() {
+        // Check if maximum limit of 8 activities is reached
         if (selectedActivities.length < 8) {
+            // Add current activity to selected activities
             selectedActivities = [...selectedActivities, activity];
+             // Call function to update selected activities count (not implemented in this code)
             updateSelectedActivitiesCount();
+            // Fetch another activity after accepting the current one
             fetchActivity(); // Fetch another activity after accepting the current one
         } else {
+            // Set error message when maximum limit is reached
             error = 'You can select a maximum of 8 activities.';
         }
     }
@@ -52,33 +60,43 @@
 
     // Function to generate weekend plan
     function generatePlan() {
+        // Map selected activities to format them as a list
         weekendPlan = selectedActivities.map((activity, index) => `${index + 1}. ${activity}`);
+        // Set boolean to show weekend plan
         showWeekendPlan = true;
+        // Clear screen to display only weekend plan
+        clearScreen();
     }
 
-    // Function to update selected activities count
+    // Function to clear screen and show only the weekend plan
+    function clearScreen() {
+        // Hide activity form
+        document.getElementById('activity-form').style.display = 'none';
+        // Show weekend plan
+        document.getElementById('weekend-plan').style.display = 'block';
+    }
+
+    // Function to update selected activities count (not implemented in this code)
     function updateSelectedActivitiesCount() {
-        // Update selected activities count
-    }
-
-    // Function to handle restrictions on number of participants for educational type
-    function handleParticipantRestriction() {
-        const type = document.getElementById('activity-type').value;
-        if (type === 'education') {
-            participants = 1; // Restrict participants to 1 for educational type
-        }
+        // Placeholder for updating selected activities count
     }
 </script>
 
+<!-- HTML Section -->
 <main class="min-h-screen bg-cover bg-center flex flex-col justify-center items-center" style="background-image: url(https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);">
     
+    <!-- Title -->
     <h1 class="animate-bounce text-5xl font-bold mb-8">Weekend Planner</h1>
-    <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+
+     <!-- Activity Form -->
+    <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg" id="activity-form">
         <form>
+
+            <!-- Button to fetch activity suggestion -->
             <div class="mb-4">
                 <label for="activity-type" class="block text-gray-700">Type of Activity:</label>
                 <select id="activity-type"
-                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-700 focus:outline-none" on:change={handleParticipantRestriction}>
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-700 focus:outline-none">
                     <option value="education">Education</option>
                     <option value="recreational">Recreational</option>
                     <option value="social">Social</option>
@@ -90,43 +108,49 @@
                     <option value="busywork">Busywork</option>
                 </select>
             </div>
-            <div class="mb-4">
-                <label for="participants" class="block text-gray-700">Number of Participants:</label>
-                <input bind:value={participants} type="number" max="4" min="1"
-                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-700 focus:outline-none">
-            </div>
+           
+            <!-- Display section for fetched activity -->
             <button type="button" on:click={fetchActivity}
                 class="w-full bg-blue-700 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Get Activity
                 Suggestion</button>
         </form>
+        <!-- Display section for fetched activity -->
         {#if activity}
             <div class="mt-4 flex justify-between items-center">
+                <!-- Buttons to accept or decline activity -->
                 <button on:click={acceptActivity}
                     class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">Accept</button>
                 <button on:click={declineActivity}
                     class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">Decline</button>
             </div>
+            <!-- Display the fetched activity -->
             <div id="activity" class="mt-6">{activity}</div>
         {:else}
+        <!-- Display error message if no activity fetched -->
             <div class="text-red-500 mt-2">{error}</div>
         {/if}
+        <!-- Display selected activities count -->
         <h2 class="mt-6 text-lg font-semibold">Selected Activities:</h2>
         <div class="mt-2">{`You have selected ${selectedActivities.length} activities.`}</div>
+        <!-- Display error message related to activity selection -->
         <div class="text-red-500 mt-2">{error}</div>
-        <div id="weekend-plan" class="mt-4" class:hidden={!showWeekendPlan}>
-            <h2 class="text-lg font-semibold mb-2">Weekend Plan:</h2>
-            <ul>
-                {#each weekendPlan as planItem}
-                    <li>{planItem}</li>
-                {/each}
-            </ul>
-        </div>
-        <button on:click={generatePlan}
-            class="w-full mt-4 bg-blue-700 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            disabled={selectedActivities.length === 0}>Generate Plan</button>
     </div>
+
+    <!-- Weekend Plan Section -->
+    <div id="weekend-plan" class="mt-4" style="display: none;">
+        <!-- Title for weekend plan -->
+        <h2 class="text-2xl font-bold mb-2">Weekend Plan:</h2>
+        <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg" id="activity-form">
+        <!-- List to display selected activities -->
+        <ul class="text-lg font-semibold mb-2">
+            {#each weekendPlan as planItem}
+                <li>{planItem}</li>
+            {/each}
+        </ul>
+    </div>
+    </div>
+    <!-- Button to generate weekend plan -->
+    <button on:click={generatePlan}
+        class="w-auto mt-4 bg-blue-700 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        disabled={selectedActivities.length === 0}>Generate Plan</button>
 </main>
-
-
-
-
